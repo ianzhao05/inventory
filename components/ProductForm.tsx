@@ -63,11 +63,13 @@ const ProductForm = ({
     handleSubmit,
     setError,
     watch,
-    formState: { errors },
+    setValue,
+    formState: { errors, isSubmitting },
   } = useForm<ProductFormValues>({
     defaultValues,
   });
   const supplier = watch("supplier");
+  console.log("render");
   return (
     <form onSubmit={handleSubmit(onSubmit(setError))}>
       <Grid container spacing={2}>
@@ -133,6 +135,9 @@ const ProductForm = ({
             <Autocomplete
               options={supplierOptions}
               freeSolo
+              onChange={(e, data) => {
+                setValue("supplier", data ?? "");
+              }}
               renderInput={(params) => (
                 <TextField
                   {...register("supplier")}
@@ -152,7 +157,12 @@ const ProductForm = ({
           </Stack>
         </Grid>
         <Grid item xs={12}>
-          <Button type="submit" sx={{ mt: 2 }} variant="contained">
+          <Button
+            type="submit"
+            sx={{ mt: 2 }}
+            variant="contained"
+            disabled={isSubmitting}
+          >
             Save Product
           </Button>
         </Grid>

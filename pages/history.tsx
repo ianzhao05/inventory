@@ -20,41 +20,47 @@ const History: NextPage<{ updateEvents: UpdateEventsWithProducts }> = ({
 }) => {
   return (
     <Layout title="Quantity Update History">
-      {updateEvents.map(({ id, createdAt, products }) => (
-        <Box key={id} sx={{ mb: 4 }}>
-          <Typography variant="h6" gutterBottom component="div">
-            {format(parseISO(createdAt), "eee, MMM d, y, h:mm a")}
-          </Typography>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Code</TableCell>
-                <TableCell>Supplier</TableCell>
-                <TableCell align="right">Price</TableCell>
-                <TableCell align="right">Change</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {products.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell component="th" scope="row">
-                    {product.name}
-                  </TableCell>
-                  <TableCell>{product.code}</TableCell>
-                  <TableCell>{product.supplier?.name}</TableCell>
-                  <TableCell align="right">
-                    {product.price && "$" + formatPrice(product.price)}
-                  </TableCell>
-                  <TableCell align="right">
-                    {(product.change <= 0 ? "" : "+") + product.change}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Box>
-      ))}
+      {updateEvents.length > 0
+        ? updateEvents.map(({ id, createdAt, products }) => (
+            <Box key={id} sx={{ mb: 4 }}>
+              <Typography variant="h6" gutterBottom component="div">
+                {format(parseISO(createdAt), "eee, MMM d, y, h:mm a")}
+              </Typography>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell width="30%">Name</TableCell>
+                    <TableCell width="20%">Code</TableCell>
+                    <TableCell width="20%">Supplier</TableCell>
+                    <TableCell align="right" width="15%">
+                      Price
+                    </TableCell>
+                    <TableCell align="right" width="15%">
+                      Change
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {products.map((product) => (
+                    <TableRow key={product.id}>
+                      <TableCell component="th" scope="row">
+                        {product.name}
+                      </TableCell>
+                      <TableCell>{product.code}</TableCell>
+                      <TableCell>{product.supplier?.name}</TableCell>
+                      <TableCell align="right">
+                        {product.price && "$" + formatPrice(product.price)}
+                      </TableCell>
+                      <TableCell align="right">
+                        {(product.change <= 0 ? "" : "+") + product.change}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
+          ))
+        : "No records found"}
     </Layout>
   );
 };

@@ -88,7 +88,7 @@ const Scan: NextPage = () => {
     register,
     handleSubmit,
     setError,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<ScanFormValues>({
     defaultValues: { products: [{ code: "", action: "add", quantity: 0 }] },
   });
@@ -246,7 +246,12 @@ const Scan: NextPage = () => {
         >
           Add Product
         </Button>
-        <Button type="submit" sx={{ display: "block" }} variant="contained">
+        <Button
+          type="submit"
+          sx={{ display: "block" }}
+          variant="contained"
+          disabled={isSubmitting}
+        >
           Update All Products
         </Button>
       </form>
