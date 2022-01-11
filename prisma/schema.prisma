@@ -1,0 +1,50 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["extendedIndexes", "interactiveTransactions"]
+}
+
+model Product {
+  id           Int                      @id @default(autoincrement())
+  code         String                   @unique
+  name         String
+  price        Decimal?                 @db.Decimal(6, 2)
+  quantity     Int                      @default(0)
+  description  String?
+  manufacturer String?
+  supplier     Supplier?                @relation(fields: [supplierId], references: [id])
+  supplierId   Int?
+  updateEvents UpdateEventsOnProducts[]
+
+  @@index([code, name])
+}
+
+model Supplier {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  products Product[]
+
+  @@index([name])
+}
+
+model UpdateEvent {
+  id        Int                      @id @default(autoincrement())
+  createdAt DateTime                 @default(now())
+  products  UpdateEventsOnProducts[]
+
+  @@index([createdAt(sort: Desc)])
+}
+
+model UpdateEventsOnProducts {
+  product       Product     @relation(fields: [productId], references: [id])
+  productId     Int
+  updateEvent   UpdateEvent @relation(fields: [updateEventId], references: [id])
+  updateEventId Int
+  quantity      Int
+
+  @@id([productId, updateEventId])
+}
