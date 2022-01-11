@@ -9,7 +9,7 @@ const Login: NextPage = () => {
     register,
     handleSubmit,
     setError,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<{ password: string }>({
     defaultValues: { password: "" },
   });
@@ -61,7 +61,12 @@ const Login: NextPage = () => {
                 error={!!errors.password}
                 helperText={errors?.password?.message}
               />
-              <Button type="submit" sx={{ mt: 2 }} variant="contained">
+              <Button
+                type="submit"
+                sx={{ mt: 2 }}
+                variant="contained"
+                disabled={isSubmitting}
+              >
                 Submit
               </Button>
             </form>
