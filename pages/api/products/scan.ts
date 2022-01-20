@@ -16,39 +16,46 @@ export default async function handler(
   if (req.method === "POST") {
     const body = req.body as { id: number; quantity: number }[];
     try {
-      const updateEvent = await prisma.$transaction(async () => {
-        for (const [index, { id, quantity }] of body.entries()) {
-          console.log([index, { id, quantity }]);
-          const action = quantity > 0 ? "increment" : "decrement";
-          const product = await prisma.product.update({
-            data: {
-              quantity: {
-                [action]: Math.abs(quantity),
-              },
-            },
-            where: {
-              id,
-            },
-            select: { quantity: true },
-          });
-          if (product.quantity < 0) {
-            const e: any = new Error("Not enough stock");
-            e.name = "QuantityError";
-            e.index = index;
-            throw e;
-          }
+      const products = await prisma.product.findMany({
+        where: { id: { in: body.map(({ id }) => id) } },
+        select: { id: true, quantity: true },
+      });
+      for (const [index, { id, quantity }] of body.entries()) {
+        const existing = products.find((p) => id === p.id)?.quantity;
+        if (existing === undefined) {
+          const e: any = new Error("Invalid product ID");
+          e.name = "QuantityError";
+          e.index = index;
+          throw e;
+        } else if (existing + quantity < 0) {
+          const e: any = new Error("Not enough stock");
+          e.name = "QuantityError";
+          e.index = index;
+          throw e;
         }
-        const updateEvent = await prisma.updateEvent.create({
+      }
+      for (const { id, quantity } of body) {
+        const action = quantity > 0 ? "increment" : "decrement";
+        await prisma.product.update({
           data: {
-            products: {
-              create: body.map(({ id, quantity }) => ({
-                quantity,
-                product: { connect: { id } },
-              })),
+            quantity: {
+              [action]: Math.abs(quantity),
             },
           },
+          where: {
+            id,
+          },
         });
-        return updateEvent;
+      }
+      const updateEvent = await prisma.updateEvent.create({
+        data: {
+          products: {
+            create: body.map(({ id, quantity }) => ({
+              quantity,
+              product: { connect: { id } },
+            })),
+          },
+        },
       });
       res.status(200).json(updateEvent);
     } catch (err) {
