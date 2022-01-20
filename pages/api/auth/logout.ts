@@ -19,7 +19,6 @@ export default function handler(
         httpOnly: true,
         path: "/",
         maxAge: 0,
-        secure: process.env.NODE_ENV === "production",
       })
     );
     res.status(200).end();

@@ -24,7 +24,6 @@ export default function handler(
       cookie.serialize("token", jwt.sign({}, PASSWORD), {
         httpOnly: true,
         path: "/",
-        secure: process.env.NODE_ENV === "production",
       })
     );
     res.status(200).end();
