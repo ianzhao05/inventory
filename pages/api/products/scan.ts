@@ -2,6 +2,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { verify } from "../../../lib/password";
 import prisma from "../../../lib/prisma";
 
+type Body = { id: number; quantity: number }[];
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -14,7 +16,15 @@ export default async function handler(
   }
 
   if (req.method === "POST") {
-    const body = req.body as { id: number; quantity: number }[];
+    const body = (req.body as Body).reduce((prev, curr) => {
+      const existing = prev.find((p) => curr.id === p.id);
+      if (existing) {
+        existing.quantity += curr.quantity;
+      } else {
+        prev.push(curr);
+      }
+      return prev;
+    }, [] as Body);
     try {
       const products = await prisma.product.findMany({
         where: { id: { in: body.map(({ id }) => id) } },

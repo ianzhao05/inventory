@@ -41,7 +41,7 @@ model UpdateEvent {
 }
 
 model UpdateEventsOnProducts {
-  product       Product     @relation(fields: [productId], references: [id])
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId     Int
   updateEvent   UpdateEvent @relation(fields: [updateEventId], references: [id])
   updateEventId Int

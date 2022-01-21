@@ -6,9 +6,9 @@ import {
   Stack,
   Autocomplete,
 } from "@mui/material";
-import NumberFormat, { InputAttributes } from "react-number-format";
+import NumberFormat from "react-number-format";
 import { forwardRef } from "react";
-import { useForm, UseFormSetError } from "react-hook-form";
+import { Controller, useForm, UseFormSetError } from "react-hook-form";
 
 export type ProductFormValues = {
   code: string;
@@ -18,34 +18,6 @@ export type ProductFormValues = {
   manufacturer: string;
   supplier: string;
 };
-
-const NumberFormatCustom = forwardRef<
-  NumberFormat<InputAttributes>,
-  {
-    onChange: (event: { target: { name: string; value: string } }) => void;
-    name: string;
-  }
->(function NumberFormatCustom(props, ref) {
-  const { onChange, ...other } = props;
-  return (
-    <NumberFormat
-      {...other}
-      getInputRef={ref}
-      onValueChange={(values) => {
-        onChange({
-          target: {
-            name: props.name,
-            value: values.value,
-          },
-        });
-      }}
-      thousandSeparator
-      isNumericString
-      decimalScale={2}
-      allowNegative={false}
-    />
-  );
-});
 
 const ProductForm = ({
   defaultValues,
@@ -60,6 +32,7 @@ const ProductForm = ({
 }) => {
   const {
     register,
+    control,
     handleSubmit,
     setError,
     watch,
@@ -69,7 +42,23 @@ const ProductForm = ({
     defaultValues,
   });
   const supplier = watch("supplier");
-  console.log("render");
+  const PriceTextField = forwardRef<HTMLInputElement>((props, ref) => {
+    return (
+      <TextField
+        inputRef={ref}
+        fullWidth
+        label="Price"
+        error={!!errors.price}
+        helperText={errors?.price?.message}
+        InputProps={{
+          startAdornment: <InputAdornment position="start">$</InputAdornment>,
+        }}
+        {...props}
+      />
+    );
+  });
+  PriceTextField.displayName = "PriceTextField";
+
   return (
     <form onSubmit={handleSubmit(onSubmit(setError))}>
       <Grid container spacing={2}>
@@ -94,22 +83,22 @@ const ProductForm = ({
           />
         </Grid>
         <Grid item xs={12} sm={6}>
-          <TextField
-            {...register("price", {
-              validate: (v) =>
-                v.split(".")[0].replace(/,/g, "").length <= 4 ||
-                "Max price $9,999.99",
-            })}
-            fullWidth
-            label="Price"
-            error={!!errors.price}
-            helperText={errors?.price?.message}
-            InputProps={{
-              inputComponent: NumberFormatCustom as any,
-              startAdornment: (
-                <InputAdornment position="start">$</InputAdornment>
-              ),
-            }}
+          <Controller
+            control={control}
+            name="price"
+            render={({ field }) => (
+              <NumberFormat
+                {...field}
+                customInput={PriceTextField}
+                thousandSeparator
+                isNumericString
+                decimalScale={2}
+                allowNegative={false}
+                isAllowed={({ floatValue }) =>
+                  floatValue === undefined || floatValue < 10000
+                }
+              />
+            )}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -138,6 +127,7 @@ const ProductForm = ({
               onChange={(e, data) => {
                 setValue("supplier", data ?? "");
               }}
+              defaultValue={defaultValues.supplier || undefined}
               renderInput={(params) => (
                 <TextField
                   {...register("supplier")}

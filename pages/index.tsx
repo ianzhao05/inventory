@@ -1,4 +1,6 @@
 import type { GetServerSideProps, NextPage } from "next";
+import { useRouter } from "next/router";
+import Link from "next/link";
 import Layout from "../components/Layout";
 import {
   DataGrid,
@@ -10,8 +12,10 @@ import {
 import { verifySsr } from "../lib/password";
 import prisma from "../lib/prisma";
 import { Prisma } from "@prisma/client";
-import { Box } from "@mui/material";
+import { Box, IconButton } from "@mui/material";
+import { Edit as EditIcon } from "@mui/icons-material";
 import formatPrice from "../lib/formatPrice";
+import { useMemo } from "react";
 
 const columns: GridColDef[] = [
   { field: "name", headerName: "Name", flex: 4, minWidth: 200 },
@@ -45,6 +49,20 @@ const columns: GridColDef[] = [
     hide: true,
     valueFormatter: (params) =>
       params.value && (params.value as string).replace(/\n/g, "\\n"),
+  },
+  {
+    field: "edit",
+    headerName: "Edit",
+    sortable: false,
+    flex: 0.5,
+    minWidth: 50,
+    renderCell: ({ id }) => (
+      <Link href={`/product/${id}`} passHref>
+        <IconButton component="a">
+          <EditIcon />
+        </IconButton>
+      </Link>
+    ),
   },
 ];
 

@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { verify } from "../../../lib/password";
 import prisma from "../../../lib/prisma";
@@ -28,7 +29,45 @@ export default async function handler(
       res.status(404).json({ message: "Product does not exist" });
     }
   } else if (req.method === "PUT") {
+    const body = req.body as Omit<Prisma.ProductCreateInput, "supplier"> & {
+      supplier?: string;
+    };
+    try {
+      const product = await prisma.product.update({
+        where: { id },
+        data: {
+          ...body,
+          price:
+            body.price &&
+            new Prisma.Decimal((body.price as string).replace(/,/g, "")),
+          supplier: body.supplier
+            ? {
+                connectOrCreate: {
+                  create: { name: body.supplier },
+                  where: { name: body.supplier },
+                },
+              }
+            : undefined,
+        },
+      });
+      res.status(200).json(product);
+    } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        if (e.code === "P2002") {
+          res.status(400).json({
+            field: "code",
+            message: "A product already exists with this code",
+          });
+        }
+      } else {
+        res.status(500).json({
+          message: `An unhandled error occurred: ${(e as any).message}`,
+        });
+      }
+    }
   } else if (req.method === "DELETE") {
+    await prisma.product.delete({ where: { id } });
+    res.status(200).end();
   } else {
     res
       .setHeader("Allow", "GET, PUT, DELETE")
