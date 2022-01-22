@@ -3,17 +3,29 @@ import Layout from "../../components/Layout";
 import ProductForm, { ProductFormValues } from "../../components/ProductForm";
 import { verifySsr } from "../../lib/password";
 import prisma from "../../lib/prisma";
-import { Prisma } from "@prisma/client";
 import { useRouter } from "next/router";
 import { useSnackbar } from "notistack";
 import {
+  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  Typography,
 } from "@mui/material";
 import { useState } from "react";
+import {
+  getProduct,
+  Product,
+  ProductWithUpdateEvents,
+} from "../../lib/ssrQueries";
+import { format, parseISO } from "date-fns";
 
 const allFieldsString = ({
   code,
@@ -22,7 +34,7 @@ const allFieldsString = ({
   manufacturer,
   description,
   supplier,
-}: Exclude<ProductWithSupplier, null>): ProductFormValues => ({
+}: NonNullable<Product>): ProductFormValues => ({
   code,
   name,
   price: price ?? "",
@@ -31,8 +43,8 @@ const allFieldsString = ({
   supplier: supplier?.name ?? "",
 });
 
-const Product: NextPage<{
-  product: ProductWithSupplier;
+const ProductPage: NextPage<{
+  product: ProductWithUpdateEvents | null;
   manufacturers: string[];
   suppliers: string[];
 }> = ({ product, manufacturers, suppliers }) => {
@@ -46,41 +58,72 @@ const Product: NextPage<{
   const [deleting, setDeleting] = useState(false);
 
   return (
-    <Layout title="Edit Product">
+    <Layout title={product ? `Product "${product.name}"` : "Product Not Found"}>
       {product ? (
         <>
-          <ProductForm
-            defaultValues={allFieldsString(product)}
-            manufacturerOptions={manufacturers}
-            supplierOptions={suppliers}
-            onSubmit={(setError) => async (data) => {
-              const body = Object.fromEntries(
-                Object.entries(data).map(([key, value]) => [
-                  key,
-                  value === "" ? null : value,
-                ])
-              );
-              const response = await fetch(`/api/products/${product.id}`, {
-                method: "PUT",
-                credentials: "include",
-                body: JSON.stringify(body),
-                headers: { "Content-Type": "application/json" },
-              });
-              const { field, message } = await response.json();
-              if (!response.ok) {
-                if (field && message) {
-                  setError(field, { message });
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h6" gutterBottom component="div">
+              Quantity Updates
+            </Typography>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell width="75%">Time</TableCell>
+                  <TableCell width="25%" align="right">
+                    Change
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {product.updateEvents.map(({ id, createdAt, quantity }) => (
+                  <TableRow key={id}>
+                    <TableCell>
+                      {format(parseISO(createdAt), "eee, MMM d, y, h:mm a")}
+                    </TableCell>
+                    <TableCell align="right">
+                      {(quantity <= 0 ? "" : "+") + quantity}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h6" component="div" sx={{ mb: 2 }}>
+              Edit Product
+            </Typography>
+            <ProductForm
+              defaultValues={allFieldsString(product)}
+              manufacturerOptions={manufacturers}
+              supplierOptions={suppliers}
+              onSubmit={(setError) => async (data) => {
+                const body = Object.fromEntries(
+                  Object.entries(data).map(([key, value]) => [
+                    key,
+                    value === "" ? null : value,
+                  ])
+                );
+                const response = await fetch(`/api/products/${product.id}`, {
+                  method: "PUT",
+                  credentials: "include",
+                  body: JSON.stringify(body),
+                  headers: { "Content-Type": "application/json" },
+                });
+                const { field, message } = await response.json();
+                if (!response.ok) {
+                  if (field && message) {
+                    setError(field, { message });
+                  }
+                } else {
+                  enqueueSnackbar("Product updated", { variant: "success" });
+                  router.push("/");
                 }
-              } else {
-                enqueueSnackbar("Product updated", { variant: "success" });
-                router.push("/");
-              }
-            }}
-          />
+              }}
+            />
+          </Box>
           <Button
             variant="outlined"
             color="error"
-            sx={{ mt: 4 }}
             onClick={() => {
               setOpen(true);
             }}
@@ -130,23 +173,6 @@ const Product: NextPage<{
   );
 };
 
-const getProduct = async (id: number) => {
-  const product = await prisma.product.findUnique({
-    where: { id },
-    include: {
-      manufacturer: { select: { name: true } },
-      supplier: { select: { name: true } },
-    },
-  });
-  return (
-    product && {
-      ...product,
-      price: product.price?.toFixed(2) ?? null,
-    }
-  );
-};
-type ProductWithSupplier = Prisma.PromiseReturnType<typeof getProduct>;
-
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
     verifySsr(context.req.cookies);
@@ -154,7 +180,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return { redirect: { destination: "/login", permanent: false } };
   }
   const { id: idStr } = context.query;
-  let product: ProductWithSupplier;
+  let product: ProductWithUpdateEvents | null;
   if (typeof idStr !== "string") {
     product = null;
   } else {
@@ -178,4 +204,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   };
 };
 
-export default Product;
+export default ProductPage;

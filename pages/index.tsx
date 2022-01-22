@@ -9,11 +9,10 @@ import {
   gridClasses,
 } from "@mui/x-data-grid";
 import { verifySsr } from "../lib/password";
-import prisma from "../lib/prisma";
-import { Prisma } from "@prisma/client";
 import { Box, IconButton } from "@mui/material";
 import { Edit as EditIcon } from "@mui/icons-material";
 import formatPrice from "../lib/formatPrice";
+import { getProducts, Product } from "../lib/ssrQueries";
 
 const columns: GridColDef[] = [
   { field: "name", headerName: "Name", flex: 4, minWidth: 200 },
@@ -69,7 +68,7 @@ const columns: GridColDef[] = [
   },
 ];
 
-const exportFields: (keyof ProductsWithSupplier[number])[] = [
+const exportFields: (keyof Product)[] = [
   "name",
   "code",
   "price",
@@ -88,29 +87,23 @@ const Toolbar = () => (
   </GridToolbarContainer>
 );
 
-const Home: NextPage<{ products: ProductsWithSupplier }> = ({ products }) => {
+const Home: NextPage<{ products: Product[] }> = ({ products }) => {
   return (
     <Layout title="Inventory">
       <Box sx={{ height: "600px", width: "100%" }}>
-        <DataGrid rows={products} columns={columns} components={{ Toolbar }} />
+        <DataGrid
+          rows={products}
+          columns={columns}
+          components={{ Toolbar }}
+          hideFooterSelectedRowCount
+          disableColumnSelector
+          disableDensitySelector
+          disableSelectionOnClick
+        />
       </Box>
     </Layout>
   );
 };
-
-const getProducts = async () =>
-  (
-    await prisma.product.findMany({
-      include: {
-        manufacturer: { select: { name: true } },
-        supplier: { select: { name: true } },
-      },
-    })
-  ).map((product) => ({
-    ...product,
-    price: product.price?.toFixed(2) ?? null,
-  }));
-type ProductsWithSupplier = Prisma.PromiseReturnType<typeof getProducts>;
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {

@@ -29,7 +29,7 @@ export default async function handler(
       res.status(404).json({ message: "Product does not exist" });
     }
   } else if (req.method === "PUT") {
-    const body = req.body as Prisma.ProductCreateInput & {
+    const body = req.body as Prisma.ProductUpdateInput & {
       manufacturer?: string;
       supplier?: string;
     };
