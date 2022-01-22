@@ -48,7 +48,7 @@ export default async function handler(
                   where: { name: body.manufacturer },
                 },
               }
-            : undefined,
+            : { disconnect: true },
           supplier: body.supplier
             ? {
                 connectOrCreate: {
@@ -56,7 +56,7 @@ export default async function handler(
                   where: { name: body.supplier },
                 },
               }
-            : undefined,
+            : { disconnect: true },
         },
       });
       res.status(200).json(product);
