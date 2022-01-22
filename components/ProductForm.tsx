@@ -67,7 +67,10 @@ const ProductForm = ({
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <TextField
-            {...register("code", { required: true })}
+            {...register("code", {
+              required: true,
+              validate: (value) => !!value.trim() || "Required",
+            })}
             required
             fullWidth
             label="Product Code"
@@ -77,7 +80,10 @@ const ProductForm = ({
         </Grid>
         <Grid item xs={12} sm={6}>
           <TextField
-            {...register("name", { required: true })}
+            {...register("name", {
+              required: true,
+              validate: (value) => !!value.trim() || "Required",
+            })}
             required
             fullWidth
             label="Product Name"

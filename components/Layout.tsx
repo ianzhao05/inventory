@@ -21,6 +21,7 @@ import {
   History as HistoryIcon,
   DocumentScanner as ScanIcon,
   Factory as FactoryIcon,
+  RotateLeft as ResetIcon,
 } from "@mui/icons-material";
 import { useState } from "react";
 import Head from "next/head";
@@ -115,6 +116,16 @@ const Layout = ({
                     <ScanIcon />
                   </ListItemIcon>
                   <ListItemText primary="Update Quantities" />
+                </ListItemButton>
+              </Link>
+            </ListItem>
+            <ListItem disablePadding>
+              <Link href="/clear" passHref>
+                <ListItemButton component="a">
+                  <ListItemIcon>
+                    <ResetIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Reset Quantities" />
                 </ListItemButton>
               </Link>
             </ListItem>

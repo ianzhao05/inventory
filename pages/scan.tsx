@@ -203,6 +203,7 @@ const Scan: NextPage = () => {
                         message: "Enter a positive integer",
                       },
                       min: { value: 1, message: "Enter a positive integer" },
+                      max: { value: 10000, message: "Max 10000" },
                       validate: {
                         isNumber: (x) =>
                           Number.isInteger(x) || "Enter a positive integer",
