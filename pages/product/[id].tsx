@@ -169,7 +169,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     props: {
       product,
       manufacturers: product
-        ? (await prisma.supplier.findMany()).map((s) => s.name)
+        ? (await prisma.manufacturer.findMany()).map((s) => s.name)
         : [],
       suppliers: product
         ? (await prisma.supplier.findMany()).map((s) => s.name)

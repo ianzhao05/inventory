@@ -26,6 +26,7 @@ import {
 import { useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 const drawerWidth = 240;
 
@@ -36,6 +37,7 @@ const Layout = ({
   title: string;
   children?: React.ReactNode;
 }) => {
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const toggleDrawer = () => {
@@ -142,7 +144,7 @@ const Layout = ({
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
                   });
-                  window.location.reload();
+                  router.push("/login");
                 }}
               >
                 <ListItemIcon>
