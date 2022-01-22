@@ -1,5 +1,4 @@
 import type { GetServerSideProps, NextPage } from "next";
-import { useRouter } from "next/router";
 import Link from "next/link";
 import Layout from "../components/Layout";
 import {
@@ -15,7 +14,6 @@ import { Prisma } from "@prisma/client";
 import { Box, IconButton } from "@mui/material";
 import { Edit as EditIcon } from "@mui/icons-material";
 import formatPrice from "../lib/formatPrice";
-import { useMemo } from "react";
 
 const columns: GridColDef[] = [
   { field: "name", headerName: "Name", flex: 4, minWidth: 200 },
@@ -42,7 +40,12 @@ const columns: GridColDef[] = [
     flex: 1,
     minWidth: 100,
   },
-  { field: "manufacturer", headerName: "Manufacturer", hide: true },
+  {
+    field: "manufacturer",
+    headerName: "Manufacturer",
+    hide: true,
+    valueGetter: (params) => params.row.supplier?.name,
+  },
   {
     field: "description",
     headerName: "Description",
@@ -98,7 +101,10 @@ const Home: NextPage<{ products: ProductsWithSupplier }> = ({ products }) => {
 const getProducts = async () =>
   (
     await prisma.product.findMany({
-      include: { supplier: { select: { name: true } } },
+      include: {
+        manufacturer: { select: { name: true } },
+        supplier: { select: { name: true } },
+      },
     })
   ).map((product) => ({
     ...product,

@@ -20,7 +20,11 @@ import { useState } from "react";
 import { KeyboardArrowUp, KeyboardArrowDown } from "@mui/icons-material";
 import formatPrice from "../lib/formatPrice";
 
-const Row = ({ supplier }: { supplier: SuppliersWithProducts[number] }) => {
+const Row = ({
+  manufacturer,
+}: {
+  manufacturer: ManufacturersWithProducts[number];
+}) => {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -31,9 +35,9 @@ const Row = ({ supplier }: { supplier: SuppliersWithProducts[number] }) => {
           </IconButton>
         </TableCell>
         <TableCell component="th" scope="row">
-          {supplier.name}
+          {manufacturer.name}
         </TableCell>
-        <TableCell>{supplier.products.length}</TableCell>
+        <TableCell>{manufacturer.products.length}</TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={3}>
@@ -47,19 +51,19 @@ const Row = ({ supplier }: { supplier: SuppliersWithProducts[number] }) => {
                   <TableRow>
                     <TableCell>Name</TableCell>
                     <TableCell>Code</TableCell>
-                    <TableCell>Manufacturer</TableCell>
+                    <TableCell>Supplier</TableCell>
                     <TableCell align="right">Price</TableCell>
                     <TableCell align="right">Quantity</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {supplier.products.map((product) => (
+                  {manufacturer.products.map((product) => (
                     <TableRow key={product.id}>
                       <TableCell component="th" scope="row">
                         {product.name}
                       </TableCell>
                       <TableCell>{product.code}</TableCell>
-                      <TableCell>{product.manufacturer?.name}</TableCell>
+                      <TableCell>{product.supplier?.name}</TableCell>
                       <TableCell align="right">
                         {product.price && "$" + formatPrice(product.price)}
                       </TableCell>
@@ -76,8 +80,8 @@ const Row = ({ supplier }: { supplier: SuppliersWithProducts[number] }) => {
   );
 };
 
-const Suppliers: NextPage<{ suppliers: SuppliersWithProducts }> = ({
-  suppliers,
+const Manufacturers: NextPage<{ manufacturers: ManufacturersWithProducts }> = ({
+  manufacturers,
 }) => {
   return (
     <Layout title="Suppliers">
@@ -86,13 +90,13 @@ const Suppliers: NextPage<{ suppliers: SuppliersWithProducts }> = ({
           <TableHead>
             <TableRow>
               <TableCell />
-              <TableCell>Supplier Name</TableCell>
+              <TableCell>Manufacturer Name</TableCell>
               <TableCell>Product Count</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {suppliers.map((supplier) => (
-              <Row key={supplier.id} supplier={supplier} />
+            {manufacturers.map((manufacturer) => (
+              <Row key={manufacturer.id} manufacturer={manufacturer} />
             ))}
           </TableBody>
         </Table>
@@ -101,9 +105,9 @@ const Suppliers: NextPage<{ suppliers: SuppliersWithProducts }> = ({
   );
 };
 
-const getSuppliers = async () =>
+const getManufacturers = async () =>
   (
-    await prisma.supplier.findMany({
+    await prisma.manufacturer.findMany({
       orderBy: [{ name: "asc" }],
       include: {
         products: {
@@ -112,21 +116,23 @@ const getSuppliers = async () =>
             id: true,
             code: true,
             name: true,
-            manufacturer: true,
+            supplier: true,
             price: true,
             quantity: true,
           },
         },
       },
     })
-  ).map((supplier) => ({
-    ...supplier,
-    products: supplier.products.map((product) => ({
+  ).map((manufacturer) => ({
+    ...manufacturer,
+    products: manufacturer.products.map((product) => ({
       ...product,
       price: product.price?.toFixed(2) ?? null,
     })),
   }));
-type SuppliersWithProducts = Prisma.PromiseReturnType<typeof getSuppliers>;
+type ManufacturersWithProducts = Prisma.PromiseReturnType<
+  typeof getManufacturers
+>;
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
@@ -134,7 +140,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   } catch {
     return { redirect: { destination: "/login", permanent: false } };
   }
-  return { props: { suppliers: await getSuppliers() } };
+  return { props: { manufacturers: await getManufacturers() } };
 };
 
-export default Suppliers;
+export default Manufacturers;

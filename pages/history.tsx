@@ -79,11 +79,9 @@ const getUpdateEvents = async () =>
                 id: true,
                 code: true,
                 name: true,
-                manufacturer: true,
                 price: true,
-                supplier: {
-                  select: { name: true },
-                },
+                manufacturer: { select: { name: true } },
+                supplier: { select: { name: true } },
               },
             },
           },

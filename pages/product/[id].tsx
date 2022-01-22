@@ -27,14 +27,15 @@ const allFieldsString = ({
   name,
   price: price ?? "",
   description: description ?? "",
-  manufacturer: manufacturer ?? "",
-  supplier: supplier ?? "",
+  manufacturer: manufacturer?.name ?? "",
+  supplier: supplier?.name ?? "",
 });
 
 const Product: NextPage<{
   product: ProductWithSupplier;
+  manufacturers: string[];
   suppliers: string[];
-}> = ({ product, suppliers }) => {
+}> = ({ product, manufacturers, suppliers }) => {
   const router = useRouter();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -50,6 +51,7 @@ const Product: NextPage<{
         <>
           <ProductForm
             defaultValues={allFieldsString(product)}
+            manufacturerOptions={manufacturers}
             supplierOptions={suppliers}
             onSubmit={(setError) => async (data) => {
               const body = Object.fromEntries(
@@ -131,13 +133,15 @@ const Product: NextPage<{
 const getProduct = async (id: number) => {
   const product = await prisma.product.findUnique({
     where: { id },
-    include: { supplier: { select: { name: true } } },
+    include: {
+      manufacturer: { select: { name: true } },
+      supplier: { select: { name: true } },
+    },
   });
   return (
     product && {
       ...product,
       price: product.price?.toFixed(2) ?? null,
-      supplier: product.supplier?.name,
     }
   );
 };
@@ -164,6 +168,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   return {
     props: {
       product,
+      manufacturers: product
+        ? (await prisma.supplier.findMany()).map((s) => s.name)
+        : [],
       suppliers: product
         ? (await prisma.supplier.findMany()).map((s) => s.name)
         : [],

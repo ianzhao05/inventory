@@ -10,18 +10,27 @@ generator client {
 }
 
 model Product {
-  id           Int                      @id @default(autoincrement())
-  code         String                   @unique
-  name         String
-  price        Decimal?                 @db.Decimal(6, 2)
-  quantity     Int                      @default(0)
-  description  String?
-  manufacturer String?
-  supplier     Supplier?                @relation(fields: [supplierId], references: [id])
-  supplierId   Int?
-  updateEvents UpdateEventsOnProducts[]
+  id             Int                      @id @default(autoincrement())
+  code           String                   @unique
+  name           String
+  price          Decimal?                 @db.Decimal(6, 2)
+  quantity       Int                      @default(0)
+  description    String?
+  manufacturer   Manufacturer?            @relation(fields: [manufacturerId], references: [id])
+  manufacturerId Int?
+  supplier       Supplier?                @relation(fields: [supplierId], references: [id])
+  supplierId     Int?
+  updateEvents   UpdateEventsOnProducts[]
 
   @@index([code, name])
+}
+
+model Manufacturer {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  products Product[]
+
+  @@index([name])
 }
 
 model Supplier {

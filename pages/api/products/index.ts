@@ -25,7 +25,8 @@ export default async function handler(
     });
     res.json(products);
   } else if (req.method === "POST") {
-    const body = req.body as Omit<Prisma.ProductCreateInput, "supplier"> & {
+    const body = req.body as Prisma.ProductCreateInput & {
+      manufacturer?: string;
       supplier?: string;
     };
     try {
@@ -35,6 +36,14 @@ export default async function handler(
           price:
             body.price &&
             new Prisma.Decimal((body.price as string).replace(/,/g, "")),
+          manufacturer: body.manufacturer
+            ? {
+                connectOrCreate: {
+                  create: { name: body.manufacturer },
+                  where: { name: body.manufacturer },
+                },
+              }
+            : undefined,
           supplier: body.supplier
             ? {
                 connectOrCreate: {

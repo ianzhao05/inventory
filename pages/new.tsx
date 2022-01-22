@@ -15,13 +15,17 @@ const defaultValues: ProductFormValues = {
   supplier: "",
 };
 
-const New: NextPage<{ suppliers: string[] }> = ({ suppliers }) => {
+const New: NextPage<{ manufacturers: string[]; suppliers: string[] }> = ({
+  manufacturers,
+  suppliers,
+}) => {
   const router = useRouter();
   const { enqueueSnackbar } = useSnackbar();
   return (
     <Layout title="Initialize New Product">
       <ProductForm
         defaultValues={defaultValues}
+        manufacturerOptions={manufacturers}
         supplierOptions={suppliers}
         onSubmit={(setError) => async (data) => {
           const body = Object.fromEntries(
@@ -57,8 +61,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   } catch {
     return { redirect: { destination: "/login", permanent: false } };
   }
-  const suppliers = await prisma.supplier.findMany();
-  return { props: { suppliers: suppliers.map((s) => s.name) } };
+  return {
+    props: {
+      manufacturers: (await prisma.manufacturer.findMany()).map((m) => m.name),
+      suppliers: (await prisma.supplier.findMany()).map((s) => s.name),
+    },
+  };
 };
 
 export default New;

@@ -22,10 +22,12 @@ export type ProductFormValues = {
 const ProductForm = ({
   defaultValues,
   supplierOptions,
+  manufacturerOptions,
   onSubmit,
 }: {
   defaultValues: ProductFormValues;
   supplierOptions: string[];
+  manufacturerOptions: string[];
   onSubmit: (
     setError: UseFormSetError<ProductFormValues>
   ) => (values: ProductFormValues) => void;
@@ -41,6 +43,7 @@ const ProductForm = ({
   } = useForm<ProductFormValues>({
     defaultValues,
   });
+  const manufacturer = watch("manufacturer");
   const supplier = watch("supplier");
   const PriceTextField = forwardRef<HTMLInputElement>((props, ref) => {
     return (
@@ -106,7 +109,7 @@ const ProductForm = ({
             {...register("description")}
             fullWidth
             multiline
-            rows={6}
+            rows={7}
             label="Description"
             error={!!errors.description}
             helperText={errors?.description?.message}
@@ -114,12 +117,29 @@ const ProductForm = ({
         </Grid>
         <Grid item xs={12} sm={6}>
           <Stack spacing={2}>
-            <TextField
-              {...register("manufacturer")}
-              fullWidth
-              label="Manufacturer"
-              error={!!errors.manufacturer}
-              helperText={errors?.manufacturer?.message}
+            <Autocomplete
+              options={manufacturerOptions}
+              freeSolo
+              onChange={(e, data) => {
+                setValue("manufacturer", data ?? "");
+              }}
+              defaultValue={defaultValues.manufacturer || undefined}
+              renderInput={(params) => (
+                <TextField
+                  {...register("manufacturer")}
+                  {...params}
+                  fullWidth
+                  label="Manufacturer"
+                  error={!!errors.manufacturer}
+                  helperText={
+                    errors?.manufacturer?.message ??
+                    (manufacturerOptions.includes(manufacturer) ||
+                    manufacturer === ""
+                      ? undefined
+                      : `A new manufacturer "${manufacturer}" will be created`)
+                  }
+                />
+              )}
             />
             <Autocomplete
               options={supplierOptions}

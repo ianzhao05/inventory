@@ -20,6 +20,7 @@ import {
   People as PeopleIcon,
   History as HistoryIcon,
   DocumentScanner as ScanIcon,
+  Factory as FactoryIcon,
 } from "@mui/icons-material";
 import { useState } from "react";
 import Head from "next/head";
@@ -61,6 +62,16 @@ const Layout = ({
                     <InventoryIcon />
                   </ListItemIcon>
                   <ListItemText primary="Inventory" />
+                </ListItemButton>
+              </Link>
+            </ListItem>
+            <ListItem disablePadding>
+              <Link href="/manufacturers" passHref>
+                <ListItemButton component="a">
+                  <ListItemIcon>
+                    <FactoryIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Manufacturers" />
                 </ListItemButton>
               </Link>
             </ListItem>

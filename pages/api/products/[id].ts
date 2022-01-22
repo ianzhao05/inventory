@@ -21,7 +21,7 @@ export default async function handler(
   if (req.method === "GET") {
     const product = await prisma.product.findUnique({
       where: { id },
-      include: { supplier: true },
+      include: { manufacturer: true, supplier: true },
     });
     if (product) {
       res.json(product);
@@ -29,7 +29,8 @@ export default async function handler(
       res.status(404).json({ message: "Product does not exist" });
     }
   } else if (req.method === "PUT") {
-    const body = req.body as Omit<Prisma.ProductCreateInput, "supplier"> & {
+    const body = req.body as Prisma.ProductCreateInput & {
+      manufacturer?: string;
       supplier?: string;
     };
     try {
@@ -40,6 +41,14 @@ export default async function handler(
           price:
             body.price &&
             new Prisma.Decimal((body.price as string).replace(/,/g, "")),
+          manufacturer: body.manufacturer
+            ? {
+                connectOrCreate: {
+                  create: { name: body.manufacturer },
+                  where: { name: body.manufacturer },
+                },
+              }
+            : undefined,
           supplier: body.supplier
             ? {
                 connectOrCreate: {
