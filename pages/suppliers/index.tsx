@@ -15,9 +15,14 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { KeyboardArrowUp, KeyboardArrowDown } from "@mui/icons-material";
+import {
+  KeyboardArrowUp,
+  KeyboardArrowDown,
+  Edit as EditIcon,
+} from "@mui/icons-material";
 import { getSuppliers, SupplierWithProducts } from "../../lib/ssrQueries";
 import ProductTable from "../../components/ProductTable";
+import Link from "next/link";
 
 const Row = ({ supplier }: { supplier: SupplierWithProducts }) => {
   const [open, setOpen] = useState(false);
@@ -33,6 +38,13 @@ const Row = ({ supplier }: { supplier: SupplierWithProducts }) => {
           {supplier.name}
         </TableCell>
         <TableCell>{supplier.products.length}</TableCell>
+        <TableCell>
+          <Link href={`/suppliers/${supplier.id}`} passHref>
+            <IconButton component="a">
+              <EditIcon />
+            </IconButton>
+          </Link>
+        </TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={3}>
@@ -62,6 +74,7 @@ const Suppliers: NextPage<{ suppliers: SupplierWithProducts[] }> = ({
               <TableCell />
               <TableCell>Supplier Name</TableCell>
               <TableCell>Product Count</TableCell>
+              <TableCell>Edit</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
