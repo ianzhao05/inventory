@@ -44,6 +44,8 @@ const Layout = ({
     setMobileOpen(!mobileOpen);
   };
 
+  const titleCut = title.length > 50 ? title.slice(0, 50) + "..." : title;
+
   const drawer = (
     <>
       <Toolbar />
@@ -162,7 +164,7 @@ const Layout = ({
   return (
     <>
       <Head>
-        <title>{title}</title>
+        <title>{titleCut}</title>
       </Head>
       <Box sx={{ display: "flex" }}>
         <AppBar
@@ -180,7 +182,7 @@ const Layout = ({
               <MenuIcon />
             </IconButton>
             <Typography variant="h5" component="h1">
-              {title}
+              {titleCut}
             </Typography>
           </Toolbar>
         </AppBar>
