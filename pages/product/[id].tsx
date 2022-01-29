@@ -19,6 +19,7 @@ import {
   TableCell,
   Typography,
 } from "@mui/material";
+import { FileDownloadOutlined as FileDownloadIcon } from "@mui/icons-material";
 import { useState } from "react";
 import {
   getProduct,
@@ -65,6 +66,15 @@ const ProductPage: NextPage<{
             <Typography variant="h6" gutterBottom component="div">
               Quantity Updates
             </Typography>
+            <Button
+              component="a"
+              href={`/api/updates/export?productId=${product.id}`}
+              download
+              variant="outlined"
+              size="small"
+            >
+              <FileDownloadIcon /> Export
+            </Button>
             <Table size="small">
               <TableHead>
                 <TableRow>
