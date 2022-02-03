@@ -129,7 +129,7 @@ const Scan: NextPage = () => {
             id: productCache[code]?.id,
             quantity: action === "add" ? quantity : -quantity,
           }));
-          const response = await fetch("/api/products/scan", {
+          const response = await fetch("/api/updates", {
             method: "POST",
             credentials: "include",
             body: JSON.stringify(body),

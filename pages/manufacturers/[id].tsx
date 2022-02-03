@@ -20,6 +20,7 @@ import {
 } from "../../lib/ssrQueries";
 import ProductTable from "../../components/ProductTable";
 import { useForm } from "react-hook-form";
+import { Edit as EditIcon } from "@mui/icons-material";
 
 const ManufacturerPage: NextPage<{
   manufacturer: ManufacturerWithProducts | null;
@@ -56,7 +57,14 @@ const ManufacturerPage: NextPage<{
             <Typography variant="h6" gutterBottom component="div">
               Products from This Manufacturer
             </Typography>
-            <ProductTable products={manufacturer.products} />
+            <ProductTable
+              products={manufacturer.products}
+              button={{
+                type: "link",
+                icon: EditIcon,
+                action: (id) => `/product/${id}`,
+              }}
+            />
           </Box>
           <Box sx={{ mb: 4 }}>
             <Typography variant="h6" gutterBottom component="div">

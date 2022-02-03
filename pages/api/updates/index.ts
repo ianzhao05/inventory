@@ -76,9 +76,19 @@ export default async function handler(
         res.status(500).json({ message: `An error occurred: ${e.message}` });
       }
     }
+  } else if (req.method === "DELETE") {
+    const { productId, updateEventId } = req.body as {
+      productId: number;
+      updateEventId: number;
+    };
+    console.log(productId, updateEventId);
+    await prisma.updateEventsOnProducts.delete({
+      where: { productId_updateEventId: { productId, updateEventId } },
+    });
+    res.end();
   } else {
     res
-      .setHeader("Allow", "POST")
+      .setHeader("Allow", "POST, DELETE")
       .status(405)
       .json({ message: "Invalid method" });
   }

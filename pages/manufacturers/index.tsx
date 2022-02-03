@@ -56,7 +56,15 @@ const Row = ({ manufacturer }: { manufacturer: ManufacturerWithProducts }) => {
               <Typography variant="h6" gutterBottom component="div">
                 Products
               </Typography>
-              <ProductTable products={manufacturer.products} showSupplier />
+              <ProductTable
+                products={manufacturer.products}
+                showSupplier
+                button={{
+                  type: "link",
+                  icon: EditIcon,
+                  action: (id) => `/product/${id}`,
+                }}
+              />
             </Box>
           </Collapse>
         </TableCell>
