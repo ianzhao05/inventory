@@ -2,7 +2,7 @@ import cookie from "cookie";
 import jwt from "jsonwebtoken";
 import type { NextApiRequest } from "next";
 
-export const PASSWORD = "1234";
+export const PASSWORD = process.env.PASSWORD || "1234";
 
 export const verify = (req: NextApiRequest) => {
   if (!req.headers.cookie) {
